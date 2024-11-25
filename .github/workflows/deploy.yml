@@ -1,0 +1,45 @@
+name: Build and Deploy Multiple Vite Apps
+
+on:
+  push:
+    branches:
+      - main  # Adjust this to your main branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Set up Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'  # Ensure compatibility with Vite
+
+      # Iterate over directories and build each project
+      - name: Build and Deploy Vite Apps
+        run: |
+          # Find directories containing package.json (indicating Vite projects)
+          for dir in $(find . -type f -name package.json -exec dirname {} \;); do
+            echo "Processing project in $dir"
+            cd $dir
+            # Install dependencies
+            npm ci
+            # Build the project
+            npm run build
+            # Move the build output to a unique subdirectory in a temp dir
+            mkdir -p ../../deploy/$dir
+            mv dist/* ../../deploy/$dir/
+            cd -
+          done
+
+          # Deploy all projects to gh-pages
+          cd ../../deploy
+          git init
+          git checkout -b gh-pages
+          git add .
+          git commit -m "Deploy Vite apps"
+          git push --force git@github.com:abenrob/deck.gl-examples.git gh-pages:gh-pages
