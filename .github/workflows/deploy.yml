@@ -3,7 +3,7 @@ name: Build and Deploy Multiple Vite Apps
 on:
   push:
     branches:
-      - main  # Adjust this to your main branch
+      - master  # Adjust this to your main branch
   workflow_dispatch:  # Enables manual triggering
 
 jobs:
