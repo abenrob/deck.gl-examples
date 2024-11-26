@@ -43,8 +43,8 @@ jobs:
               mkdir -p ../deploy/$dir_name
               mv dist/* ../deploy/$dir_name/
 
-              # Rewrite asset paths in the built HTML files
-              find ../deploy/$dir_name -name "*.html" -exec sed -i "s|/assets|/$dir_name/assets|g" {} \;
+              # Rewrite asset paths in the built HTML files to use relative paths
+              find ../deploy/$dir_name -name "*.html" -exec sed -i 's|="/|="./|g' {} \;
 
             else
               echo "Skipping $dir: No build script found"
@@ -63,5 +63,5 @@ jobs:
           git init
           git checkout -b gh-pages
           git add .
-          git commit -m "Deploy Vite apps with adjusted paths"
+          git commit -m "Deploy Vite apps with relative paths"
           git push --force "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages:gh-pages
