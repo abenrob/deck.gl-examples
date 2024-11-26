@@ -28,7 +28,7 @@ jobs:
             echo "Processing project in $dir"
             cd $dir
             # Install dependencies
-            npm ci
+            npm install
             # Build the project
             npm run build
             # Move the build output to a unique subdirectory in a temp dir
