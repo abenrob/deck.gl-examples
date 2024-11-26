@@ -3,7 +3,7 @@ name: Build and Deploy Multiple Vite Apps
 on:
   push:
     branches:
-      - master  # Adjust this to your main branch
+      - master
   workflow_dispatch:  # Enables manual triggering
 
 jobs:
@@ -18,10 +18,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'  # Ensure compatibility with Vite
+          node-version: '18'
 
       # Iterate over directories and build each project
-      - name: Build and Deploy Vite Apps
+      - name: Build and Deploy Example Apps
         run: |
           # Ensure the deploy directory exists at the root
           mkdir -p deploy
@@ -35,6 +35,14 @@ jobs:
             # Check if a build script exists
             if npm run | grep -q 'build'; then
               echo "Build script found. Building project in $dir"
+
+              # Create or update vite.config.js to use a relative base path
+              echo "Creating vite.config.js with base path './'"
+              echo "import { defineConfig } from 'vite';" > vite.config.js
+              echo "export default defineConfig({" >> vite.config.js
+              echo "  base: './'," >> vite.config.js  # Set base path to relative
+              echo "});" >> vite.config.js
+
               # Install dependencies
               npm install
               # Build the project
@@ -42,9 +50,6 @@ jobs:
               # Create a subdirectory in deploy for this project
               mkdir -p ../deploy/$dir_name
               mv dist/* ../deploy/$dir_name/
-
-              # Rewrite asset paths in the built HTML files to use relative paths
-              find ../deploy/$dir_name -name "*.html" -exec sed -i 's|="/|="./|g' {} \;
 
             else
               echo "Skipping $dir: No build script found"
@@ -63,5 +68,5 @@ jobs:
           git init
           git checkout -b gh-pages
           git add .
-          git commit -m "Deploy Vite apps with relative paths"
+          git commit -m "Deploy example apps to gh-pages"
           git push --force "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages:gh-pages
