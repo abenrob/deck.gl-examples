@@ -18,7 +18,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'  # Ensure compatibility with Vite
+          node-version: '18'  # Ensure compatibility with Vite
 
       # Iterate over directories and build each project
       - name: Build and Deploy Vite Apps
@@ -27,13 +27,18 @@ jobs:
           for dir in $(find . -type f -name package.json -exec dirname {} \;); do
             echo "Processing project in $dir"
             cd $dir
-            # Install dependencies
-            npm install
-            # Build the project
-            npm run build
-            # Move the build output to a unique subdirectory in a temp dir
-            mkdir -p ../../deploy/$dir
-            mv dist/* ../../deploy/$dir/
+            # Check if a build script exists
+            if npm run | grep -q 'build'; then
+              # Install dependencies
+              npm install
+              # Build the project
+              npm run build
+              # Move the build output to a unique subdirectory in a temp dir
+              mkdir -p ../../deploy/$dir
+              mv dist/* ../../deploy/$dir/
+            else
+              echo "Skipping $dir: No build script found"
+            fi
             cd -
           done
 
