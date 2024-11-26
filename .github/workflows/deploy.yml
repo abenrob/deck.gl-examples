@@ -23,27 +23,18 @@ jobs:
       # Iterate over directories and build each project
       - name: Build and Deploy Vite Apps
         run: |
-          # Find directories containing package.json (indicating Vite projects)
+          mkdir -p deploy  # Ensure deploy directory exists
           for dir in $(find . -type f -name package.json -exec dirname {} \;); do
+            dir_name=$(basename $dir)  # Get only the directory name
             echo "Processing project in $dir"
             cd $dir
-            # Check if a build script exists
-            if npm run | grep -q 'build'; then
-              # Install dependencies
-              npm install
-              # Build the project
-              npm run build
-              # Move the build output to a unique subdirectory in a temp dir
-              mkdir -p ../../deploy/$dir
-              mv dist/* ../../deploy/$dir/
-            else
-              echo "Skipping $dir: No build script found"
-            fi
+            npm install
+            npm run build
+            mkdir -p ../deploy/$dir_name  # Use only the directory name
+            mv dist/* ../deploy/$dir_name/
             cd -
           done
-
-          # Deploy all projects to gh-pages
-          cd ../../deploy
+          cd deploy
           git init
           git checkout -b gh-pages
           git add .
